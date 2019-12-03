@@ -5,14 +5,12 @@ from itertools import chain, tee
 def recursive_calculate_fuel_needed(mass_list):
     m1, m2 = tee(mass_list)
     if all(m <= 0 for m in m1):
-        return 0
+        return []
 
-    total = 0
-    additional_masses = []
-    for fuel in calculate_fuel_needed(m2):
-        total += fuel
-        additional_masses.append(fuel)
-    return total + recursive_calculate_fuel_needed(additional_masses)
+    fuel_needed, additional_mass = tee(calculate_fuel_needed(m2))
+    additional_fuel_needed = recursive_calculate_fuel_needed(additional_mass)
+
+    return chain(fuel_needed, additional_fuel_needed)
 
 
 def calculate_fuel_needed(module_mass_list):
@@ -39,7 +37,7 @@ def main():
         total_fuel_needed = sum(calculate_fuel_needed(read_file(args.input_file)))
     elif args.part == "two":
         input_masses = read_file(args.input_file)
-        total_fuel_needed = recursive_calculate_fuel_needed(input_masses)
+        total_fuel_needed = sum(recursive_calculate_fuel_needed(input_masses))
 
     print("Total fuel needed for this launch: ", total_fuel_needed)
 
